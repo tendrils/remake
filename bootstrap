@@ -732,7 +732,9 @@ fi
 
 download_po_files() {
   subdir=$1
-  domain=$2
+#  domain=$2
+#  temporarily fudge the download script to just use the gnu-make translations
+  domain=make
   echo "$me: getting translations into $subdir for $domain..."
   cmd=$(printf "$po_download_command_format" "$subdir" "$domain")
   eval "$cmd"

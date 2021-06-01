@@ -23,12 +23,12 @@ MAKE_HOST =	@MAKE_HOST@
 
 SUBDIRS =	lib po doc
 
-bin_PROGRAMS =	make
-include_HEADERS = src/gnumake.h
+bin_PROGRAMS =	remake
+include_HEADERS = src/gnumake.h src/remake.h
 
-man_MANS =	doc/make.1
+man_MANS =	doc/remake.1
 
-make_SRCS =	src/ar.c src/arscan.c src/commands.c src/commands.h \
+remake_SRCS =	src/ar.c src/arscan.c src/commands.c src/commands.h \
 		src/debug.h src/default.c src/dep.h src/dir.c src/expand.c \
 		src/file.c src/filedef.h src/function.c src/getopt.c \
 		src/getopt.h src/getopt1.c src/gettext.h src/guile.c \
@@ -56,8 +56,8 @@ alloca_SRCS =	lib/alloca.c
 
 loadavg_SRCS =	lib/getloadavg.c
 
-make_SOURCES =	$(make_SRCS)
-EXTRA_make_SOURCES = $(amiga_SRCS) $(vms_SRCS)
+remake_SOURCES =	$(remake_SRCS)
+EXTRA_remake_SOURCES = $(amiga_SRCS) $(vms_SRCS)
 
 if HAVE_GUILE
   _GUILE_CFLAGS = $(GUILE_CFLAGS)
@@ -67,7 +67,7 @@ else
   _GUILE_LIBS =
 endif
 
-make_LDADD =	$(LIBOBJS) $(_GUILE_LIBS) lib/libgnu.a $(GETLOADAVG_LIBS) \
+remake_LDADD =	$(LIBOBJS) $(_GUILE_LIBS) lib/libgnu.a $(GETLOADAVG_LIBS) \
 		@LIBINTL@
 
 localedir =	$(datadir)/locale
@@ -79,16 +79,16 @@ AM_CPPFLAGS =	-Isrc -I$(top_srcdir)/src -Ilib -I$(top_srcdir)/lib \
 AM_CFLAGS =	$(_GUILE_CFLAGS)
 
 if WINDOWSENV
-  make_SOURCES += $(w32_SRCS)
+  remake_SOURCES += $(w32_SRCS)
   AM_CPPFLAGS  += -I $(top_srcdir)/src/w32/include
 else
-  make_SOURCES += src/posixos.c
+  remake_SOURCES += src/posixos.c
 endif
 
 if USE_CUSTOMS
-  make_SOURCES += src/remote-cstms.c
+  remake_SOURCES += src/remote-cstms.c
 else
-  make_SOURCES += src/remote-stub.c
+  remake_SOURCES += src/remote-stub.c
 endif
 
 # Extra stuff to include in the distribution.
