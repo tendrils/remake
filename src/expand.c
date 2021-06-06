@@ -27,6 +27,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* Initially, any errors reported when expanding strings will be reported
    against the file where the error appears.  */
 const floc **expanding_var = &reading_file;
+exp_trace *exp_stack = 0;
 
 /* The next two describe the variable output buffer.
    This buffer is used to hold the variable-expansion of a line of the
@@ -89,6 +90,29 @@ initialize_variable_output ()
   return variable_buffer;
 }
 
+/* Push 'v' onto expansion context stack */
+void context_stack_push(struct variable *v) {
+  exp_trace *new_trace = malloc(sizeof(exp_trace));
+
+  *new_trace = (exp_trace) {
+    0,0,v->name
+  };
+
+  if(exp_stack)
+    new_trace->parent = exp_stack;
+
+  if (v->fileinfo.filenm)
+    new_trace->filectx = &v->fileinfo;
+
+  exp_stack = new_trace;
+}
+
+void context_stack_pop() {
+  exp_trace *old = exp_stack;
+  exp_stack = exp_stack->parent;
+  free(old);
+}
+
 /* Recursively expand V.  The returned string is malloc'd.  */
 
 static char *allocated_variable_append (const struct variable *v);
@@ -101,6 +125,8 @@ recursively_expand_for_file (struct variable *v, struct file *file)
   const floc **saved_varp;
   struct variable_set_list *save = 0;
   int set_reading = 0;
+
+  context_stack_push(v);
 
   /* Don't install a new location if this location is empty.
      This can happen for command-line variables, builtin variables, etc.  */
@@ -147,6 +173,7 @@ recursively_expand_for_file (struct variable *v, struct file *file)
   if (file)
     current_variable_set_list = save;
 
+  context_stack_pop();
   expanding_var = saved_varp;
 
   return value;

@@ -502,6 +502,15 @@ typedef struct
     unsigned long offset;
   } floc;
 
+typedef struct _exp_trace exp_trace;
+
+struct _exp_trace
+  {
+    exp_trace *parent;
+    const floc *filectx;
+    const char *varname;
+  };
+
 const char *concat (unsigned int, ...);
 void message (int prefix, size_t length, const char *fmt, ...)
               ATTRIBUTE ((__format__ (__printf__, 3, 4)));
@@ -679,6 +688,7 @@ extern char **environ;
 
 extern const floc *reading_file;
 extern const floc **expanding_var;
+extern exp_trace *exp_stack;
 
 extern unsigned short stopchar_map[];
 

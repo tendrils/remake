@@ -558,6 +558,30 @@ get_buffer (size_t need)
   return fmtbuf.buffer;
 }
 
+void print_macro_stack_entry(const exp_trace *trace)
+{
+  const char *filename = trace->filectx != NULL?
+            (trace->filectx->filenm != NULL?
+                trace->filectx->filenm: "") : "";
+  const char *varname = trace->varname? trace->varname : "";
+  unsigned long lineno = trace->filectx? trace->filectx->lineno : 0;
+  int len = strlen (filename) + strlen (varname) + INTSTR_LENGTH;
+  char *msg = get_buffer(len);
+
+  sprintf(msg, "%s:%lu: %s\n", filename, lineno, varname);
+  outputs(0,msg);
+}
+
+void print_macro_stack_trace(const exp_trace *trace)
+{
+  outputs(1, "Macro expansion stack:\n");
+  while(trace != NULL)
+  {
+    print_macro_stack_entry(trace);
+    trace = trace->parent;
+  }
+}
+
 /* Print a message on stdout.  */
 
 void
@@ -617,6 +641,11 @@ error (const floc *flocp, size_t len, const char *fmt, ...)
 
   assert (fmtbuf.buffer[len-1] == '\0');
   outputs (1, fmtbuf.buffer);
+
+  /* print stack trace if we are performing an expansion right now */
+  if(exp_stack) {
+    print_macro_stack_trace(exp_stack);
+  }
 }
 
 /* Print an error message and exit.  */
@@ -649,6 +678,11 @@ fatal (const floc *flocp, size_t len, const char *fmt, ...)
 
   assert (fmtbuf.buffer[len-1] == '\0');
   outputs (1, fmtbuf.buffer);
+
+  /* print stack trace if we are performing an expansion right now */
+  if(exp_stack) {
+    print_macro_stack_trace(exp_stack);
+  }
 
   die (MAKE_FAILURE);
 }
